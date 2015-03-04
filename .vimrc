@@ -10,7 +10,6 @@ let g:user_emmet_leader_key='<C-E>'
 " Tab width
 set tabstop=4
 set shiftwidth=4
-set expandtab
 
 " Run a given vim command on the results of fuzzy selecting from a given shell
 " command. See usage below.
@@ -43,10 +42,18 @@ call vundle#begin()
 " let Vundle manage Vundle, required
 Plugin 'gmarik/Vundle.vim'
 
+Plugin 'altercation/vim-colors-solarized'
 Plugin 'mattn/emmet-vim'
+
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
+
+let g:solarized_termcolors = 256
+set background=dark
+colorscheme solarized
+set t_Co=256
+
 " To ignore plugin indent changes, instead use:
 "filetype plugin on
 "
