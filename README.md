@@ -1,7 +1,7 @@
 # my-dot-vimrc
 
-This is my `.vimrc` file. I use [Vundle](https://github.com/gmarik/Vundle.vim). This probably won't work without it.
+My `.vimrc`
 
-## Plug-ins
-+ [emmet-vim](https://github.com/mattn/emmet-vim)
-+ [selecta](https://github.com/garybernhardt/selecta)
+I probably could sym link this, but I use this to get my latest changes.
+
+`cat ~/.vimrc | pbcopy`

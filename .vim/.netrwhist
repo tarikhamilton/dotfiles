@@ -1,4 +1,0 @@
-let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =2
-let g:netrw_dirhist_1='/Users/tiki/Dropbox/web/apps/tarikhamilton/client/apps/html5-skyPainter/.git'
-let g:netrw_dirhist_2='/Users/tiki/.vim/bundle/Vundle.vim'
