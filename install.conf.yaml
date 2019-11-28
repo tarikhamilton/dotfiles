@@ -1,0 +1,5 @@
+- link:
+    ~/.zshrc: ~/dotfiles/.zshrc
+    ~/.vimrc: ~/dotfiles/.vimrc
+- create:
+    - ~/dracula-theme
