@@ -50,7 +50,7 @@ ZSH_THEME="dracula"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git)
+plugins=(git npm composer zsh-autosuggestions)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -82,8 +82,11 @@ export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:$HOME/.co
 # For a full list of active aliases, run `alias`.
 #
 # Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
+alias zshconfig="vim ~/.zshrc"
+alias ohmyzsh="vim ~/.oh-my-zsh"
+alias c="cd ~/Code"
+alias p="cd ~/personal" # Would like to change to Personal...
+
 export PATH="$HOME/.rbenv/bin:$PATH"
 eval "$(rbenv init -)"
 export PATH="/usr/local/sbin:$PATH"
@@ -112,6 +115,22 @@ compctl -U -K jump_completion j
 
 # Add Visual Studio Code (code)
 export PATH="/Applications/Visual Studio Code.app/Contents/Resources/app/bin:$PATH"
+
+# Set Spaceship ZSH as a prompt
+autoload -U promptinit; promptinit
+prompt spaceship
+
+# Delete git tag locally & remotely
+#
+# Example dt 2.0.0
+function dt() {
+  git tag --delete $1
+  git push origin :$1
+  echo "$1 was deleted locally and remotely."
+}
+
+# Fix j not working with autojump
+# [[ -s `brew --prefix`/etc/autojump.sh ]] && . `brew --prefix`/etc/autojump.sh
 
 # option + left/right for cursor to skip words
 bindkey "[D" backward-word
