@@ -14,6 +14,8 @@ git submodule update --init --recursive "${DOTBOT_DIR}"
 
 # Download Dracula zsh theme
 
+rm -rf ~/dracula-theme/zsh
+rm ~/.oh-my-zsh/themes/dracula.zsh-theme
 git clone https://github.com/dracula/zsh.git ~/dracula-theme/zsh
 ln -s ~/dracula-theme/zsh/dracula.zsh-theme ~/.oh-my-zsh/themes/dracula.zsh-theme
 

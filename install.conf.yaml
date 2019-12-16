@@ -1,5 +1,9 @@
+- defaults:
+    link:
+        relink: true
+- clean: ['~']
 - link:
-    ~/.zshrc: ~/dotfiles/.zshrc
-    ~/.vimrc: ~/dotfiles/.vimrc
+    ~/.zshrc: .zshrc
+    ~/.vimrc: .vimrc
 - create:
     - ~/dracula-theme
