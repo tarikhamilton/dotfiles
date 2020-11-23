@@ -1,7 +1,7 @@
-# my-dot-vimrc
+# dotfiles
 
-My `.vimrc`
+My dotfiles which should be managed with [Dotbot](https://github.com/anishathalye/dotbot).
 
-I probably could sym link this, but I use this to get my latest changes.
-
-`cat ~/.vimrc | pbcopy`
+```
+./install
+```

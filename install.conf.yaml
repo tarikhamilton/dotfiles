@@ -1,9 +1,26 @@
 - defaults:
     link:
-        relink: true
-- clean: ['~']
+      create: true
+      relink: true
+
+- clean: ["~", "~/dotfiles"]
+
 - link:
-    ~/.zshrc: .zshrc
-    ~/.vimrc: .vimrc
+    ~/.zshrc:
+    ~/.vimrc:
+
+- shell:
+    - "source ~/.zshrc"
+    - '[ -d ~/.oh-my-zsh ] || sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"'
+
 - create:
-    - ~/dracula-theme
+    - ~/dracula
+    - ~/Code
+
+- shell:
+    - "[ -d $DRACULA_THEME/zsh ] || git clone https://github.com/dracula/zsh.git $DRACULA_THEME/zsh"
+    - "ln -sf $DRACULA_THEME/zsh/dracula.zsh-theme ~/dotfiles/dracula.zsh-theme"
+    - "[ -d $DRACULA_THEME/iterm ] || git clone https://github.com/dracula/iterm.git $DRACULA_THEME/iterm"
+
+- link:
+    ~/.oh-my-zsh/themes/dracula.zsh-theme:
