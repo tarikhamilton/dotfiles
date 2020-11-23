@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+# For a list of available casks:
+#
+# - visit https://formulae.brew.sh/cask/
+# - or run `brew -S [query]`
+
+brew cask install adobe-creative-cloud
+brew cask install alfred
+brew cask install dash
+brew cask install iterm2
+brew cask install gitkraken
+brew cask install google-chrome
+brew cask install rectangle
+brew cask install setapp
+brew cask install visual-studio-code
+
+PRIVATE_DEVICE=1
+
+while getopts p opt; do
+    case $opt in
+    p)
+        PRIVATE_DEVICE=0
+        ;;
+    esac
+done
+
+if [ $PRIVATE_DEVICE = 0 ]; then
+    brew cask install ableton-live-suite
+    brew cask install dropbox
+    brew cask install guitar-pro
+    brew cask install thinkorswim
+fi
