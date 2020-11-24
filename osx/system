@@ -8,6 +8,7 @@
 brew cask install adobe-creative-cloud
 brew cask install alfred
 brew cask install dash
+brew cask install docker
 brew cask install iterm2
 brew cask install gitkraken
 brew cask install google-chrome
