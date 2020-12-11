@@ -5,6 +5,8 @@
 # - visit https://formulae.brew.sh/cask/
 # - or run `brew -S [query]`
 
+brew install jump
+
 brew cask install adobe-creative-cloud
 brew cask install alfred
 brew cask install dash
