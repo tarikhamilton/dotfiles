@@ -88,7 +88,7 @@ alias c="cd ~/Code"
 alias p="cd ~/personal" # Would like to change to Personal...
 
 export PATH="$HOME/.rbenv/bin:$PATH"
-eval "$(rbenv init -)"
+# eval "$(rbenv init -)"
 export PATH="/usr/local/sbin:$PATH"
 
 export NVM_DIR="$HOME/.nvm"
@@ -135,3 +135,6 @@ function dt() {
 # option + left/right for cursor to skip words
 bindkey "[D" backward-word
 bindkey "[C" forward-word
+
+# Requires: nvm and plop installed globally
+alias gplop="ts-node --script-mode \"/Users/$USER/.nvm/versions/node/$(node -v)/bin/plop\" --plopfile ~/Code/plopfiles/plopfile.ts"
