@@ -6,17 +6,21 @@
 # - or run `brew -S [query]`
 
 brew install jump
+brew install nvm
 
-brew cask install adobe-creative-cloud
-brew cask install alfred
-brew cask install dash
-brew cask install docker
-brew cask install iterm2
-brew cask install gitkraken
-brew cask install google-chrome
-brew cask install rectangle
-brew cask install setapp
-brew cask install visual-studio-code
+brew install --cask adobe-creative-cloud
+brew install --cask alfred
+brew install --cask dash
+brew install --cask docker
+brew install --cask franz
+brew install --cask iterm2
+brew install --cask gitkraken
+brew install --cask google-chrome
+brew install --cask rectangle
+brew install --cask setapp
+brew install --cask spotify
+brew install --cask visual-studio-code
+brew install insomnia
 
 PRIVATE_DEVICE=1
 
@@ -29,8 +33,9 @@ while getopts p opt; do
 done
 
 if [ $PRIVATE_DEVICE = 0 ]; then
-    brew cask install ableton-live-suite
-    brew cask install dropbox
-    brew cask install guitar-pro
-    brew cask install thinkorswim
+    brew install --cask ableton-live-suite
+    brew install --cask dropbox
+    brew install --cask guitar-pro
+    brew install --cask lastfm
+    brew install --cask thinkorswim
 fi
