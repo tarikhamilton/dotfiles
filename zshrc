@@ -133,3 +133,6 @@ function dt() {
 bindkey "[D" backward-word
 bindkey "[C" forward-word
 fpath=($fpath "/Users/tiki/.zfunctions")
+
+# Requires: nvm and plop installed globally
+alias gplop="ts-node --script-mode \"/Users/$USER/.nvm/versions/node/$(node -v)/bin/plop\" --plopfile ~/Code/plopfiles/plopfile.ts"
