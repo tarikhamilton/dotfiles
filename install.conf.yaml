@@ -2,12 +2,15 @@
     link:
       create: true
       relink: true
+    shell:
+      stderr: true
 
 - clean: ["~", "~/dotfiles"]
 
 - link:
     ~/.zshrc:
     ~/.vimrc:
+    ~/.config/nvim/init.vim: vimrc
 
 - shell:
     - "source ~/.zshrc"
@@ -20,10 +23,10 @@
 
 - shell:
     - "source ~/.zshrc"
-    - "[ -d $DRACULA_THEME/zsh ] || git clone https://github.com/dracula/zsh.git $DRACULA_THEME/zsh"
+    - "[ -d $DRACULA_THEME/zsh ] || git clone https://github.com/dracula/zsh $DRACULA_THEME/zsh"
     - "ln -sf $DRACULA_THEME/zsh/dracula.zsh-theme ~/dotfiles/dracula.zsh-theme"
-    - "[ -d $DRACULA_THEME/iterm ] || git clone https://github.com/dracula/iterm.git $DRACULA_THEME/iterm"
-    - "[ -d $ZSH_CUSTOM/plugins/zsh-autosuggestions ] || git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
+    - "[ -d $DRACULA_THEME/iterm ] || git clone https://github.com/dracula/iterm $DRACULA_THEME/iterm"
+    - "[ -d ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions ] || git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
 
 - link:
     ~/.oh-my-zsh/themes/dracula.zsh-theme:
