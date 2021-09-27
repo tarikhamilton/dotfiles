@@ -5,12 +5,11 @@
 # - visit https://formulae.brew.sh/cask/
 # - or run `brew -S [query]`
 
-brew install jump
+brew install autojump 
 brew install nvm
 
 brew install --cask adobe-creative-cloud
 brew install --cask alfred
-brew install --cask dash
 brew install --cask docker
 brew install --cask slack
 brew install --cask iterm2

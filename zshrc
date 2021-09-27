@@ -50,13 +50,13 @@ ZSH_THEME="spaceship"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git npm composer zsh-autosuggestions)
-
-source $ZSH/oh-my-zsh.sh
+plugins=(git autojump npm composer zsh-autosuggestions)
 
 # User configuration
 
 export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:$HOME/.composer/vendor/bin:/opt/homebrew/bin"
+
+source $ZSH/oh-my-zsh.sh
 
 # export MANPATH="/usr/local/man:$MANPATH"
 
@@ -92,24 +92,6 @@ export NVM_DIR="$HOME/.nvm"
   [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && . "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
   [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && . "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
 
-__jump_chpwd() {
-  jump chdir
-}
-
-jump_completion() {
-  reply=(${(f)"$(jump hint $@)"})
-}
-
-j() {
-  local dir="$(jump cd $@)"
-  test -d "$dir" && cd "$dir"
-}
-
-typeset -gaU chpwd_functions
-chpwd_functions+=__jump_chpwd
-
-compctl -U -K jump_completion j
-
 # Add Visual Studio Code (code)
 export PATH="/Applications/Visual Studio Code.app/Contents/Resources/app/bin:$PATH"
 
@@ -125,9 +107,6 @@ function dt() {
   git push origin :$1
   echo "$1 was deleted locally and remotely."
 }
-
-# Fix j not working with autojump
-# [[ -s `brew --prefix`/etc/autojump.sh ]] && . `brew --prefix`/etc/autojump.sh
 
 # option + left/right for cursor to skip words
 bindkey "[D" backward-word
