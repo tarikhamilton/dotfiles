@@ -1,12 +1,27 @@
+" syntax highlighting
+syntax on
+
 " line count
 set number
+
+" ignore case in search
+set ignorecase
+
+" highlight all results* (I have no idea what this is)
+set hlsearch
+
+" show search results as you type
+set incsearch 
+
+" re-map <ESC> to jk
+inoremap jk <ESC>
 
 " Emmet shortcut change
 let g:user_emmet_leader_key='<C-E>'
 
 " Tab width
-set tabstop=4
-set shiftwidth=4
+set tabstop=2
+set shiftwidth=2
 
 " Run a given vim command on the results of fuzzy selecting from a given shell
 " command. See usage below.
@@ -50,8 +65,6 @@ call plug#begin('~/.vim/plugged')
 call plug#end()
 
 filetype plugin indent on    " required
-
-syntax on
 
 " Required for dracula theme
 set termguicolors
