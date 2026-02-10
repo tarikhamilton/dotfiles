@@ -12,9 +12,6 @@ ZSH_THEME="spaceship"
 #    export TERM='xterm-color'
 # fi
 
-# Uncomment the following line to use case-sensitive completion.
-# CASE_SENSITIVE="true"
-
 # Uncomment the following line to disable bi-weekly auto-update checks.
 # DISABLE_AUTO_UPDATE="true"
 
@@ -43,9 +40,6 @@ ZSH_THEME="spaceship"
 # The optional three formats: "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
 # HIST_STAMPS="mm/dd/yyyy"
 
-# Would you like to use another custom folder than $ZSH/custom?
-# ZSH_CUSTOM=/path/to/new-custom-folder
-
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
@@ -54,11 +48,9 @@ plugins=(git autojump npm composer zsh-autosuggestions)
 
 # User configuration
 
-export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:$HOME/.composer/vendor/bin:/opt/homebrew/bin"
+export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:$HOME/.composer/vendor/bin"
 
 source $ZSH/oh-my-zsh.sh
-
-# export MANPATH="/usr/local/man:$MANPATH"
 
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
@@ -82,15 +74,13 @@ source $ZSH/oh-my-zsh.sh
 # For a full list of active aliases, run `alias`.
 #
 # Example aliases
+export ZSH_CUSTOM
 alias zshconfig="vim ~/.zshrc"
 alias ohmyzsh="vim ~/.oh-my-zsh"
 alias c="cd ~/Code"
+alias python="/usr/bin/python3"
 
 export PATH="/usr/local/sbin:$PATH"
-
-export NVM_DIR="$HOME/.nvm"
-  [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && . "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
-  [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && . "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
 
 # Add Visual Studio Code (code)
 export PATH="/Applications/Visual Studio Code.app/Contents/Resources/app/bin:$PATH"
@@ -113,5 +103,59 @@ bindkey "[D" backward-word
 bindkey "[C" forward-word
 fpath=($fpath "/Users/tiki/.zfunctions")
 
+export PATH="/opt/homebrew/opt/php@7.4/bin:$PATH"
+export PATH="/opt/homebrew/opt/php@7.4/sbin:$PATH"
+
+export PATH="/opt/homebrew/opt/postgresql@17/bin:$PATH"
+export PATH="/opt/homebrew/bin:$PATH"
+export PATH="/opt/homebrew/sbin:$PATH"
+
+# Use Homebrew's Ruby install
+# export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
+# export PATH="$HOME/.rbenv/bin:$PATH"
+# eval "$(rbenv init - zsh)"
+alias rom='cd ~/rubyonmac && /usr/bin/env bash ~/rubyonmac/rom-ultimate 2>&1 | tee ~/rom-ultimate.log'
+
+alias romup='cd ~/Downloads/rubyonmac-ultimate && /usr/bin/env bash ~/Downloads/rubyonmac-ultimate/update'
+
+source /opt/homebrew/opt/chruby/share/chruby/chruby.sh
+
+source /opt/homebrew/opt/chruby/share/chruby/auto.sh
+
+chruby ruby-3.1.2
+
+chruby ruby-2.7.6
+
+eval "$(nodenv init -)"
+
+nodenv global 18.13.0
+
 # Requires: nvm and plop installed globally
 alias gplop="ts-node --script-mode \"/Users/$USER/.nvm/versions/node/$(node -v)/bin/plop\" --plopfile ~/Code/plopfiles/plopfile.ts"
+
+
+# pnpm
+export PNPM_HOME="/Users/tiki/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+
+export PATH="/Users/tiki/bin:/Users/tiki/.local/bin:$PATH"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# Java (OpenJDK 17 via Homebrew)
+export JAVA_HOME="/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home"
+export PATH="$JAVA_HOME/bin:$PATH"
+
+# Android SDK (via Homebrew command line tools)
+export ANDROID_SDK_ROOT="/opt/homebrew/share/android-commandlinetools"
+export ANDROID_HOME="$ANDROID_SDK_ROOT"
+export PATH="$PATH:$ANDROID_SDK_ROOT/emulator"
+export PATH="$PATH:$ANDROID_SDK_ROOT/platform-tools"
+export PATH="$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+export PATH="/opt/homebrew/opt/postgresql@17/bin:$PATH"

@@ -56,7 +56,12 @@ endif
 
 call plug#begin('~/.vim/plugged')
 
+	Plug 'github/copilot.vim'
+  Plug 'tpope/vim-surround'
   Plug 'tpope/vim-sensible'
+	Plug 'nvim-lua/plenary.nvim'
+	Plug 'nvim-telescope/telescope.nvim'
+	Plug 'Mofiqul/dracula.nvim'
   Plug 'dracula/vim', { 'as': 'dracula' }
   Plug 'prettier/vim-prettier', {
     \ 'do': 'npm install',

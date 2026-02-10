@@ -15,6 +15,7 @@
 - shell:
     - "source ~/.zshrc"
     - '[ -d ~/.oh-my-zsh ] || sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"'
+    - '[ -d ~/.nvm ] || sh -c "$(curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash)"'
 
 - create:
     - ~/dracula
@@ -26,6 +27,8 @@
     - "[ -d $DRACULA_THEME/zsh ] || git clone https://github.com/dracula/zsh $DRACULA_THEME/zsh"
     - "ln -sf $DRACULA_THEME/zsh/dracula.zsh-theme ~/dotfiles/dracula.zsh-theme"
     - "[ -d $DRACULA_THEME/iterm ] || git clone https://github.com/dracula/iterm $DRACULA_THEME/iterm"
+    - "[ -d $ZSH_CUSTOM/themes/spaceship-prompt ] || git clone https://github.com/spaceship-prompt/spaceship-prompt.git $ZSH_CUSTOM/themes/spaceship-prompt --depth=1"
+    - "ln -sf $ZSH_CUSTOM/themes/spaceship-prompt/spaceship.zsh-theme $ZSH_CUSTOM/themes/spaceship.zsh-theme"
     - "[ -d ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions ] || git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
 
 - link:

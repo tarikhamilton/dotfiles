@@ -6,6 +6,7 @@
 # - or run `brew -S [query]`
 
 brew install autojump 
+brew install git-lfs
 brew install nvm
 
 brew install --cask adobe-creative-cloud
