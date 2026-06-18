@@ -3,8 +3,13 @@ export ZSH=$HOME/.oh-my-zsh
 export DRACULA_THEME=$HOME/dracula
 
 # Set name of the theme to load.
-# Look in ~/.oh-my-zsh/themes/
-ZSH_THEME="spaceship"
+# Cursor / VS Code: Spaceship + zsh-autosuggestions broke ZLE redraw after `cd`. Keep robbyrussell here;
+# autosuggestions are OK with that theme if we avoid rebinding widgets every precmd (see below).
+if [[ "$TERM_PROGRAM" == "vscode" || "$TERM_PROGRAM" == "cursor" || -n "${VSCODE_SHELL_INTEGRATION:-}" ]]; then
+  ZSH_THEME="robbyrussell"
+else
+  ZSH_THEME="spaceship"
+fi
 
 # if [ -e /usr/share/terminfo/x/xterm-256color ]; then
     export TERM='xterm-256color'
@@ -50,6 +55,10 @@ plugins=(git autojump npm composer zsh-autosuggestions)
 
 export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:$HOME/.composer/vendor/bin"
 
+if [[ "$TERM_PROGRAM" == "vscode" || "$TERM_PROGRAM" == "cursor" || -n "${VSCODE_SHELL_INTEGRATION:-}" ]]; then
+  export ZSH_AUTOSUGGEST_MANUAL_REBIND=1
+fi
+
 source $ZSH/oh-my-zsh.sh
 
 # You may need to manually set your language environment
@@ -78,7 +87,21 @@ export ZSH_CUSTOM
 alias zshconfig="vim ~/.zshrc"
 alias ohmyzsh="vim ~/.oh-my-zsh"
 alias c="cd ~/Code"
-alias python="/usr/bin/python3"
+alias localsites='cd "$HOME/Local Sites"'
+# alias python="/usr/bin/python3"  # commented so virtualenv activation sets python correctly
+# Safe aliases for system Python (do not override python; venv will control that):
+alias py='/usr/bin/python3'
+alias pysys='/usr/bin/python3'
+alias py39='/usr/bin/python3'
+# Homebrew Python (if installed)
+if [[ -x /opt/homebrew/bin/python3.11 ]]; then alias pybrew='/opt/homebrew/bin/python3.11'
+elif [[ -x /opt/homebrew/bin/python3 ]]; then alias pybrew='/opt/homebrew/bin/python3'
+fi
+# pip follows active interpreter
+alias pip='python -m pip'
+alias pip3='python -m pip'
+# Create .venv in current dir and show activate instructions
+venv() { python3 -m venv .venv && echo "Created .venv. Activate with: source .venv/bin/activate"; }
 
 export PATH="/usr/local/sbin:$PATH"
 
@@ -149,13 +172,109 @@ export PATH="/Users/tiki/bin:/Users/tiki/.local/bin:$PATH"
 export JAVA_HOME="/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home"
 export PATH="$JAVA_HOME/bin:$PATH"
 
-# Android SDK (via Homebrew command line tools)
-export ANDROID_SDK_ROOT="/opt/homebrew/share/android-commandlinetools"
-export ANDROID_HOME="$ANDROID_SDK_ROOT"
-export PATH="$PATH:$ANDROID_SDK_ROOT/emulator"
-export PATH="$PATH:$ANDROID_SDK_ROOT/platform-tools"
-export PATH="$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
+# Android SDK (Android Studio)
+export ANDROID_HOME="$HOME/Library/Android/sdk"
+export ANDROID_SDK_ROOT="$ANDROID_HOME"
+export PATH="$PATH:$ANDROID_HOME/emulator"
+export PATH="$PATH:$ANDROID_HOME/platform-tools"
+export PATH="$PATH:$ANDROID_HOME/cmdline-tools/latest/bin"
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 export PATH="/opt/homebrew/opt/postgresql@17/bin:$PATH"
+
+# Cursor / VS Code integrated terminal fixes (TERM_PROGRAM=vscode, VSCODE_SHELL_INTEGRATION=1):
+# 1) Safer `j` — no colored echo -e (harmless if shell integration still glitches).
+# 2) Sync autojump DB update on cd — upstream uses `autojump --add ... &!` in chpwd; background
+#   jobs here often leave the prompt line broken until Ctrl+C. `ls` never triggers chpwd; `j` does.
+if [[ "$TERM_PROGRAM" == "vscode" || "$TERM_PROGRAM" == "cursor" || -n "${VSCODE_SHELL_INTEGRATION:-}" ]]; then
+  j() {
+    if [[ ${1} == -* ]] && [[ ${1} != "--" ]]; then
+      autojump "${@}"
+      return
+    fi
+    setopt localoptions noautonamedirs
+    local output="$(autojump "${@}")"
+    if [[ -d "${output}" ]]; then
+      print -r -- "${output}"
+      builtin cd "${output}"
+    else
+      echo "autojump: directory '${@}' not found"
+      echo "\n${output}\n"
+      echo "Try \`autojump --help\` for more information."
+      false
+    fi
+  }
+
+  if (( ${+functions[autojump_chpwd]} )); then
+    chpwd_functions=( "${(@)chpwd_functions:#autojump_chpwd}" )
+  fi
+  _autojump_chpwd_sync_vscode() {
+    command autojump --add "$(pwd)" >/dev/null 2>&1
+  }
+  chpwd_functions+=(_autojump_chpwd_sync_vscode)
+fi
+# pm — unified Product Mommy launcher.
+#
+# Opens a fresh claude conversation in ~/Code with the chosen personality. Each
+# invocation gets a new session UUID; closing the terminal ends it. The session
+# JSONL lands in ~/.claude/projects/-Users-tiki-Code/ like any claude session
+# but nothing registers it in .product-mommy/agents.json so the launcher UI
+# never sees it.
+#
+# Keyed off the claude session UUID (CLAUDE_CODE_SESSION_ID, also delivered
+# to hooks on stdin as session_id), so two `pm` windows running simultaneously
+# never see each other's completion notifications.
+#
+# Usage:
+#   pm                            # base product-mommy identity
+#   pm urm-mommy                  # clones the urm-mommy personality
+#   pm product-mommy-chase        # clones the chase personality
+#   pm --list                     # show available personalities
+#   pm --resume <id>              # resume an existing named session
+#   pm <flavor> -p "..."          # extra args forward to claude
+pm() {
+  local PM_DIR="$HOME/Code/tarik-ai/.product-mommy"
+  if [[ "$1" == "--list" ]]; then
+    echo "Available pm personalities:"
+    echo "  product-mommy (default — base instructions)"
+    if [[ -d "$PM_DIR/personalities/.compiled" ]]; then
+      for f in "$PM_DIR/personalities/.compiled"/*.md; do
+        [[ -f "$f" ]] || continue
+        local id="$(basename "$f" .md)"
+        # Skip orphans — only list compiled files whose source still exists.
+        [[ -f "$PM_DIR/personalities/${id}.md" ]] && echo "  $id"
+      done
+    fi
+    return 0
+  fi
+  if [[ "$1" == "--resume" ]]; then
+    shift
+    local resume_id="${1:-}"
+    if [[ -z "$resume_id" ]]; then
+      echo "pm --resume requires a session id" >&2
+      return 1
+    fi
+    shift
+    cd ~/Code && claude --resume "$resume_id" "$@"
+    return
+  fi
+  local flavor="${1:-product-mommy}"
+  local instructions_path
+  if [[ "$flavor" == "product-mommy" ]]; then
+    instructions_path="$PM_DIR/instructions.md"
+  else
+    instructions_path="$PM_DIR/personalities/.compiled/${flavor}.md"
+    shift
+  fi
+  if [[ ! -f "$instructions_path" ]]; then
+    echo "pm: no personality '$flavor' at $instructions_path" >&2
+    echo "Run 'pm --list' to see available personalities." >&2
+    return 1
+  fi
+  cd ~/Code && claude --append-system-prompt-file "$instructions_path" "$@"
+}
+
+# Back-compat alias so muscle memory keeps working during the pmtemp → pm
+# transition. Forwards every arg to pm verbatim.
+pmtemp() { pm "$@"; }
