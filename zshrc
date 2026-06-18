@@ -272,7 +272,7 @@ pm() {
     echo "Run 'pm --list' to see available personalities." >&2
     return 1
   fi
-  cd ~/Code && claude --append-system-prompt-file "$instructions_path" "$@"
+  cd ~/Code && claude --name "$flavor" --append-system-prompt-file "$instructions_path" "$@"
 }
 
 # Back-compat alias so muscle memory keeps working during the pmtemp → pm
