@@ -246,6 +246,9 @@ pm() {
         [[ -f "$PM_DIR/personalities/${id}.md" ]] && echo "  $id"
       done
     fi
+    echo ""
+    echo "Modifier flags (combine with any personality):"
+    echo "  --orchestrator / -o   routing-first PM that delegates by default"
     return 0
   fi
   if [[ "$1" == "--resume" ]]; then
@@ -259,6 +262,12 @@ pm() {
     cd ~/Code && claude --resume "$resume_id" "$@"
     return
   fi
+  # Strip --orchestrator / -o from the front, if present.
+  local orchestrator=0
+  if [[ "$1" == "--orchestrator" || "$1" == "-o" ]]; then
+    orchestrator=1
+    shift
+  fi
   local flavor="${1:-product-mommy}"
   local instructions_path
   if [[ "$flavor" == "product-mommy" ]]; then
@@ -267,10 +276,32 @@ pm() {
     instructions_path="$PM_DIR/personalities/.compiled/${flavor}.md"
     shift
   fi
+  # Also accept --orchestrator AFTER the flavor for natural typing.
+  if [[ "$1" == "--orchestrator" || "$1" == "-o" ]]; then
+    orchestrator=1
+    shift
+  fi
   if [[ ! -f "$instructions_path" ]]; then
     echo "pm: no personality '$flavor' at $instructions_path" >&2
     echo "Run 'pm --list' to see available personalities." >&2
     return 1
+  fi
+  # Overlay: when --orchestrator is set, concat the orchestrator addendum
+  # onto the base personality into a temp file and use that as the system
+  # prompt. The original personality files are not modified.
+  if [[ $orchestrator -eq 1 ]]; then
+    local overlay_path="$PM_DIR/personalities/orchestrator.md"
+    if [[ -f "$overlay_path" ]]; then
+      local tmp_file
+      tmp_file="$(mktemp -t pm-orchestrator.XXXXXXXX).md"
+      cat "$instructions_path" > "$tmp_file"
+      printf '\n\n---\n\n' >> "$tmp_file"
+      cat "$overlay_path" >> "$tmp_file"
+      instructions_path="$tmp_file"
+      flavor="${flavor}-orchestrator"
+    else
+      echo "pm: warning: orchestrator overlay not found at $overlay_path" >&2
+    fi
   fi
   cd ~/Code && claude --name "$flavor" --append-system-prompt-file "$instructions_path" "$@"
 }
