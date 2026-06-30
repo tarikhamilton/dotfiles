@@ -1,5 +1,5 @@
 #!/bin/bash
-# claude-pm — canonical launcher for PERSISTENT Product Mommy sessions.
+# pm-persist — canonical launcher for PERSISTENT Product Mommy sessions.
 #
 # Lives in ~/dotfiles/bin/ (version-controlled). Symlinked to ~/.local/bin/
 # via install.conf.yaml so it's on $PATH.
@@ -22,16 +22,16 @@
 #   - setting CLAUDE_PM_AGENT_ID + the resume-prompt suppression env vars
 #
 # Used by:
-#   - terminal: just type `claude-pm` or `claude-pm photos`
+#   - terminal: just type `pm-persist` or `pm-persist photos`
 #   - iTerm Dynamic Profiles (Photos, Declutter, …): Command field calls
-#     `claude-pm <flavor>` so the profile JSON stays one line
+#     `pm-persist <flavor>` so the profile JSON stays one line
 #   - launcher API (when config.profile is set, the inline command is
-#     skipped and iTerm runs the profile's Command — same claude-pm call)
+#     skipped and iTerm runs the profile's Command — same pm-persist call)
 #
 # Usage:
-#   claude-pm                     # opens product-mommy (canonical PM)
-#   claude-pm photos              # opens product-mommy-photos
-#   claude-pm declutter           # opens product-mommy-declutter
+#   pm-persist                     # opens product-mommy (canonical PM)
+#   pm-persist photos              # opens product-mommy-photos
+#   pm-persist declutter           # opens product-mommy-declutter
 
 set -euo pipefail
 
@@ -68,7 +68,7 @@ else
 fi
 
 if [ ! -f "$instructions_path" ]; then
-  echo "claude-pm: instructions file missing at $instructions_path" >&2
+  echo "pm-persist: instructions file missing at $instructions_path" >&2
   exit 1
 fi
 

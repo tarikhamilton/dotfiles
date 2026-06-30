@@ -11,7 +11,7 @@
     ~/.zshrc:
     ~/.vimrc:
     ~/.config/nvim/init.vim: vimrc
-    ~/.local/bin/claude-pm: bin/claude-pm
+    ~/.local/bin/pm-persist: bin/pm-persist
 
 - shell:
     - "source ~/.zshrc"
