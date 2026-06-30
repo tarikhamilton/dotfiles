@@ -17,6 +17,22 @@ fi
 #    export TERM='xterm-color'
 # fi
 
+# --- Claude Code: undo macOS Gatekeeper quarantine ("Apple cannot verify...") ---
+# Apple's XProtect occasionally quarantines or deletes the (signed but un-notarized)
+# claude binary. Run `fix-claude` to reinstall if missing and strip the quarantine flag.
+fix-claude() {
+  local bin
+  bin="$(readlink -f "$(command -v claude)" 2>/dev/null)"
+  if [[ -z "$bin" || ! -f "$bin" ]]; then
+    echo "claude binary missing — reinstalling via Homebrew..."
+    brew reinstall --cask --force claude-code || return 1
+    bin="$(readlink -f "$(command -v claude)" 2>/dev/null)"
+  fi
+  xattr -d com.apple.quarantine "$bin" 2>/dev/null
+  hash -r
+  echo "Fixed: $(claude --version 2>&1)"
+}
+
 # Uncomment the following line to disable bi-weekly auto-update checks.
 # DISABLE_AUTO_UPDATE="true"
 
@@ -309,3 +325,36 @@ pm() {
 # Back-compat alias so muscle memory keeps working during the pmtemp → pm
 # transition. Forwards every arg to pm verbatim.
 pmtemp() { pm "$@"; }
+
+# iterm-open — open an iTerm profile by name in a new tab (or new window if
+# iTerm has none open / isn't running). Profile name must match exactly what
+# iTerm shows in its profile list (case + spacing matter).
+#
+# Usage:
+#   iterm-open Photos
+#   iterm-open "tarik-ai dev"
+#   iterm-open --list                # show every profile iTerm knows about
+iterm-open() {
+  if [[ "$1" == "--list" ]]; then
+    osascript -e 'tell application "iTerm" to return name of every profile' \
+      | tr ',' '\n' | sed 's/^ *//'
+    return 0
+  fi
+  if [[ -z "$1" ]]; then
+    echo "iterm-open: needs a profile name (try --list)" >&2
+    return 1
+  fi
+  local profile="$1"
+  osascript <<APPLESCRIPT
+tell application "iTerm"
+  activate
+  try
+    tell current window
+      create tab with profile "$profile"
+    end tell
+  on error
+    create window with profile "$profile"
+  end try
+end tell
+APPLESCRIPT
+}

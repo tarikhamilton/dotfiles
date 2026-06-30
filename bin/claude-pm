@@ -1,0 +1,88 @@
+#!/bin/bash
+# claude-pm — canonical launcher for PERSISTENT Product Mommy sessions.
+#
+# Lives in ~/dotfiles/bin/ (version-controlled). Symlinked to ~/.local/bin/
+# via install.conf.yaml so it's on $PATH.
+#
+# Why a wrapper instead of an alias / shell rc export of CLAUDE_PM_AGENT_ID:
+#   The notify-drain hook keys off CLAUDE_PM_AGENT_ID. If that env were
+#   exported in ~/.zprofile / ~/.bashrc, every login shell — including
+#   the bash --login that backs each dispatched-child PTY in the launcher
+#   — would re-set it, defeating the agent-pty.ts env sanitization and
+#   silently routing notifications into the wrong sessions.
+#
+#   By setting CLAUDE_PM_AGENT_ID inline on the exec line, the env stays
+#   scoped to this one claude process tree and never leaks back into the
+#   parent shell or into unrelated subshells.
+#
+# Single source of truth for:
+#   - resolving agent_id = product-mommy[-<flavor>]
+#   - loading the pre-stitched personality file from .compiled/<id>.md if
+#     it exists, falling back to the base instructions
+#   - setting CLAUDE_PM_AGENT_ID + the resume-prompt suppression env vars
+#
+# Used by:
+#   - terminal: just type `claude-pm` or `claude-pm photos`
+#   - iTerm Dynamic Profiles (Photos, Declutter, …): Command field calls
+#     `claude-pm <flavor>` so the profile JSON stays one line
+#   - launcher API (when config.profile is set, the inline command is
+#     skipped and iTerm runs the profile's Command — same claude-pm call)
+#
+# Usage:
+#   claude-pm                     # opens product-mommy (canonical PM)
+#   claude-pm photos              # opens product-mommy-photos
+#   claude-pm declutter           # opens product-mommy-declutter
+
+set -euo pipefail
+
+PM_DIR="$HOME/Code/tarik-ai/.product-mommy"
+PM_INSTRUCTIONS_BASE="$PM_DIR/instructions.md"
+PM_PERSONALITIES="$PM_DIR/personalities"
+PM_COMPILED="$PM_PERSONALITIES/.compiled"
+PM_TOOLS="Edit Write Read Glob Grep Bash"
+PM_CWD="$HOME/Code"
+
+flavor="${1:-}"
+if [ -n "$flavor" ]; then
+  agent_id="product-mommy-${flavor}"
+else
+  agent_id="product-mommy"
+fi
+
+# Pick the instructions file: prefer the pre-stitched compiled personality
+# (base + personality block), fall back to the base if no personality exists
+# for this flavor. The harness re-stitches on every launcher spawn; we use
+# whatever was last written.
+if [ -f "$PM_COMPILED/${agent_id}.md" ]; then
+  instructions_path="$PM_COMPILED/${agent_id}.md"
+elif [ -f "$PM_PERSONALITIES/${agent_id}.md" ]; then
+  # Personality source exists but compiled file doesn't — stitch it now.
+  mkdir -p "$PM_COMPILED"
+  cat "$PM_INSTRUCTIONS_BASE" > "$PM_COMPILED/${agent_id}.md"
+  printf '\n\n---\n\n' >> "$PM_COMPILED/${agent_id}.md"
+  cat "$PM_PERSONALITIES/${agent_id}.md" >> "$PM_COMPILED/${agent_id}.md"
+  printf '\n' >> "$PM_COMPILED/${agent_id}.md"
+  instructions_path="$PM_COMPILED/${agent_id}.md"
+else
+  instructions_path="$PM_INSTRUCTIONS_BASE"
+fi
+
+if [ ! -f "$instructions_path" ]; then
+  echo "claude-pm: instructions file missing at $instructions_path" >&2
+  exit 1
+fi
+
+cd "$PM_CWD"
+
+# CLAUDE_CODE_RESUME_* match the launcher's resume-prompt suppression so
+# terminal-launched PMs don't get the "Resume from summary?" dialog mid-
+# session (mirrors RESUME_PROMPT_SUPPRESSION_ENV in
+# app/launcher/lib/command-builder.ts).
+exec env \
+  CLAUDE_PM_AGENT_ID="$agent_id" \
+  CLAUDE_CODE_RESUME_THRESHOLD_MINUTES=99999999 \
+  CLAUDE_CODE_RESUME_TOKEN_THRESHOLD=999999999999 \
+  claude \
+    --resume "$agent_id" \
+    --append-system-prompt-file "$instructions_path" \
+    --allowedTools "$PM_TOOLS"
