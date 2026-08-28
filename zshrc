@@ -270,6 +270,7 @@ pm() {
     echo ""
     echo "Modifier flags (combine with any personality):"
     echo "  --orchestrator / -o   routing-first PM that delegates by default"
+    echo "  --fast / -f           skip SessionStart hooks (faster startup)"
     return 0
   fi
   if [[ "$1" == "--resume" ]]; then
@@ -283,28 +284,31 @@ pm() {
     cd ~/Code && claude --resume "$resume_id" "$@"
     return
   fi
-  # Strip --orchestrator / -o from the front, if present.
+  # Modifier flags are accepted in any order, before or after the personality.
   local orchestrator=0
   local PM_FAST=""
-  if [[ "$1" == "--fast" || "$1" == "-f" ]]; then PM_FAST=1; shift; fi
-  if [[ "$1" == "--orchestrator" || "$1" == "-o" ]]; then
-    orchestrator=1
-    shift
-  fi
-  local flavor="${1:-product-mommy}"
+  local flavor=""
+  local pass
+  for pass in 1 2; do
+    while (( $# )); do
+      case "$1" in
+        --fast|-f) PM_FAST=1; shift ;;
+        --orchestrator|-o) orchestrator=1; shift ;;
+        *) break ;;
+      esac
+    done
+    if [[ $pass -eq 1 && -n "$1" && "$1" != -* ]]; then
+      flavor="$1"
+      shift
+    fi
+  done
+  flavor="${flavor:-product-mommy}"
   local instructions_path
   if [[ "$flavor" == "product-mommy" ]]; then
     instructions_path="$PM_DIR/instructions.md"
   else
     instructions_path="$PM_DIR/personalities/.compiled/${flavor}.md"
-    shift
   fi
-  # Also accept --orchestrator AFTER the flavor for natural typing.
-  if [[ "$1" == "--orchestrator" || "$1" == "-o" ]]; then
-    orchestrator=1
-    shift
-  fi
-  if [[ "$1" == "--fast" || "$1" == "-f" ]]; then PM_FAST=1; shift; fi
   if [[ ! -f "$instructions_path" ]]; then
     echo "pm: no personality '$flavor' at $instructions_path" >&2
     echo "Run 'pm --list' to see available personalities." >&2
@@ -332,7 +336,7 @@ pm() {
     fast_flags=(--setting-sources project,local \
                 --settings "$HOME/Code/tarik-ai/.product-mommy/lab/settings-nohooks.json")
   fi
-  cd ~/Code && claude --name "$flavor" --append-system-prompt-file "$instructions_path" ${fast_flags[@]} "$@"
+  cd ~/Code && claude --name "$flavor" --append-system-prompt-file "$instructions_path" "${fast_flags[@]}" "$@"
 }
 
 # Back-compat alias so muscle memory keeps working during the pmtemp → pm
