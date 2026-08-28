@@ -9,6 +9,11 @@ if [[ "$TERM_PROGRAM" == "vscode" || "$TERM_PROGRAM" == "cursor" || -n "${VSCODE
   ZSH_THEME="robbyrussell"
 else
   ZSH_THEME="spaceship"
+  # Never let the prompt block on a daemon: spaceship's docker/kubectl sections
+  # shell out (docker version / kubectl version) and hang every new tab when
+  # the daemon is wedged. Version segments are cosmetic — keep them off.
+  SPACESHIP_DOCKER_SHOW=false
+  SPACESHIP_KUBECTL_VERSION_SHOW=false
 fi
 
 # if [ -e /usr/share/terminfo/x/xterm-256color ]; then
@@ -280,6 +285,8 @@ pm() {
   fi
   # Strip --orchestrator / -o from the front, if present.
   local orchestrator=0
+  local PM_FAST=""
+  if [[ "$1" == "--fast" || "$1" == "-f" ]]; then PM_FAST=1; shift; fi
   if [[ "$1" == "--orchestrator" || "$1" == "-o" ]]; then
     orchestrator=1
     shift
@@ -297,6 +304,7 @@ pm() {
     orchestrator=1
     shift
   fi
+  if [[ "$1" == "--fast" || "$1" == "-f" ]]; then PM_FAST=1; shift; fi
   if [[ ! -f "$instructions_path" ]]; then
     echo "pm: no personality '$flavor' at $instructions_path" >&2
     echo "Run 'pm --list' to see available personalities." >&2
@@ -319,7 +327,12 @@ pm() {
       echo "pm: warning: orchestrator overlay not found at $overlay_path" >&2
     fi
   fi
-  cd ~/Code && claude --name "$flavor" --append-system-prompt-file "$instructions_path" "$@"
+  local -a fast_flags
+  if [[ -n "${PM_FAST:-}" ]]; then
+    fast_flags=(--setting-sources project,local \
+                --settings "$HOME/Code/tarik-ai/.product-mommy/lab/settings-nohooks.json")
+  fi
+  cd ~/Code && claude --name "$flavor" --append-system-prompt-file "$instructions_path" ${fast_flags[@]} "$@"
 }
 
 # Back-compat alias so muscle memory keeps working during the pmtemp → pm
@@ -358,3 +371,28 @@ tell application "iTerm"
 end tell
 APPLESCRIPT
 }
+
+# --- Auto-launch tmux in iTerm (control mode) ---------------------------------
+# One persistent session ("main") so work survives disconnects and is reachable
+# remotely (SSH in, then `tmux attach -t main`). Guards:
+#   $TMUX empty        -> don't recurse inside tmux's own panes
+#   iTerm.app only     -> never hijack SSH/Termius/VS Code sessions (-CC needs iTerm)
+#   $NO_TMUX empty     -> escape hatch: `NO_TMUX=1 zsh` for a plain shell
+if [[ -z "$TMUX" && "$TERM_PROGRAM" == "iTerm.app" && -z "$NO_TMUX" ]]; then
+  # Only become the -CC gateway when "main" has no attached client yet. A second
+  # control-mode client for a session iTerm already mirrors never completes its
+  # handshake, leaving the tab as a dead control channel (no prompt, keys echo).
+  # Once main is attached, extra tabs are plain shells; `tmux attach` by hand.
+  if ! /opt/homebrew/bin/tmux ls -F '#{session_name} #{session_attached}' 2>/dev/null | grep -q '^main [1-9]'; then
+    exec /opt/homebrew/bin/tmux -CC new -A -s main
+  fi
+fi
+
+# >>> grok installer >>>
+export PATH="$HOME/.grok/bin:$PATH"
+fpath=(~/.grok/completions/zsh $fpath)
+autoload -Uz compinit && compinit -C
+# <<< grok installer <<<
+
+# Claude Code profiles (prompt-lab)
+source ~/Code/tarik-ai/.product-mommy/lab/aliases.zsh
