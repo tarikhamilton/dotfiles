@@ -172,7 +172,7 @@ chruby ruby-2.7.6
 
 eval "$(nodenv init -)"
 
-nodenv global 18.13.0
+nodenv global 22.17.1
 
 # Requires: nvm and plop installed globally
 alias gplop="ts-node --script-mode \"/Users/$USER/.nvm/versions/node/$(node -v)/bin/plop\" --plopfile ~/Code/plopfiles/plopfile.ts"
